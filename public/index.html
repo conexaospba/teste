@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Boneca Reborn - Personalização</title>
+  <style>
+    body { font-family: Quicksand, Arial, sans-serif; background: #fff7fb; margin: 0; padding: 0; }
+    .main { max-width: 500px; margin: 32px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 18px #dbb1ca42; padding: 24px 22px 40px 22px;}
+    h2 { color: #be4299; }
+    .step { display: none; }
+    .step.active { display: block; }
+    label { display:block; margin: 10px 0 3px 0; }
+    input, select { width: 100%; padding: 7px; border-radius: 7px; border: 1px solid #be4299; margin-bottom: 12px;}
+    button { background: #be4299; color: #fff; padding: 11px 0; border: none; border-radius: 8px; width: 100%; font-size: 1.11em; font-weight: bold; cursor: pointer; margin: 8px 0;}
+    button.secondary { background: #bba3b8; color: #fff; margin-bottom: 0;}
+    .form-header { text-align:center; margin-bottom:20px;}
+    .hide { display:none; }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="form-header">
+      <h2>Personalize sua Boneca Reborn</h2>
+      <span id="step-indicator"></span>
+    </div>
+    <!-- Passos -->
+    <div class="step active" id="step-1">
+      <label>Nome completo</label>
+      <input type="text" id="nome">
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-2">
+      <label>Endereço</label>
+      <input type="text" id="endereco">
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-3">
+      <label>CEP</label>
+      <input type="text" id="cep">
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-4">
+      <label>Cidade</label>
+      <input type="text" id="cidade">
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-5">
+      <label>Estado</label>
+      <input type="text" id="estado">
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-6">
+      <label>Telefone</label>
+      <input type="text" id="telefone">
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-7">
+      <label>Nome da boneca</label>
+      <select id="nome-boneca">
+        <option value="Sofia">Sofia</option>
+        <option value="Valentina">Valentina</option>
+        <option value="Maria">Maria</option>
+      </select>
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-8">
+      <label>Cor do cabelo</label>
+      <select id="cor-cabelo">
+        <option value="Castanho">Castanho</option>
+        <option value="Loiro">Loiro</option>
+        <option value="Preto">Preto</option>
+        <option value="Ruivo">Ruivo</option>
+      </select>
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="nextStep()">Próximo</button>
+    </div>
+    <div class="step" id="step-9">
+      <label>Forma de pagamento</label>
+      <select id="pagamento">
+        <option value="Pix">Pix</option>
+        <option value="Cartão">Cartão de Crédito</option>
+      </select>
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button class="primary" onclick="verificaPagamento()">Próximo</button>
+    </div>
+    <div class="step" id="step-10">
+      <h3>Resumo:</h3>
+      <div id="resumo"></div>
+      <button class="secondary" onclick="prevStep()">Voltar</button>
+      <button onclick="finalizarPedido()">Finalizar</button>
+    </div>
+    <div class="step" id="step-final">
+      <h3>Pedido realizado!</h3>
+      <p>Seu pedido foi registrado. Entraremos em contato para confirmação.</p>
+    </div>
+  </div>
+  <script>
+    let step = 1;
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step-' + n).classList.add('active');
+      document.getElementById('step-indicator').textContent = "Etapa " + n + " de 10";
+    }
+    function nextStep() { step++; showStep(step); }
+    function prevStep() { step--; showStep(step); }
+    function v(id) { return document.getElementById(id).value; }
+    function verificaPagamento() {
+      const forma = v('pagamento');
+      if (forma === "Pix") {
+        window.location.href = "pagamento-pix.html";
+      } else if (forma === "Cartão") {
+        window.location.href = "pagamento-cartao.html";
+      }
+    }
+    function finalizarPedido() {
+      step++;
+      showStep(step);
+    }
+    showStep(step);
+  </script>
+</body>
+</html>
